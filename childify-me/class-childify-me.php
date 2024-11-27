@@ -32,7 +32,7 @@ if ( ! class_exists( 'Childify_Me' ) ) :
 		 * @static
 		 * @var string
 		 */
-		private static $plug_version = '1.2.3';
+		private static $plug_version = '1.3.9';
 
 		/**
 		 * Themes which do not need the style.css importing.
@@ -85,7 +85,7 @@ if ( ! class_exists( 'Childify_Me' ) ) :
 				}
 
 				// adds plugin text domain.
-				add_action( 'plugins_loaded', array( $instance, 'cm_plugin_lang' ) );
+				add_action( 'after_setup_theme', array( $instance, 'cm_plugin_lang' ) );
 				// setup hooks.
 				add_action( 'plugins_loaded', array( $instance, 'cm_plugin_setup_hooks' ) );
 			}
@@ -115,6 +115,11 @@ if ( ! class_exists( 'Childify_Me' ) ) :
 		 * @return void
 		 */
 		public function cm_plugin_setup_hooks() {
+			add_action(
+				'customize_register',
+				'__return_true'
+			);
+
 			add_action(
 				'customize_controls_enqueue_scripts',
 				array( $this, 'cm_customize_js_css' ),
@@ -332,8 +337,6 @@ EOF;
 		 *
 		 * @since 1.0.0
 		 *
-		 * @hook plugins_loaded
-		 *
 		 * @return void
 		 */
 		public function cm_plugin_lang() {
@@ -429,9 +432,15 @@ EOF;
 						esc_html__( 'Create', 'childify-me' ),
 						esc_html__( 'Cancel', 'childify-me' )
 					);
-					printf('<div id="cm-success" class="updated"><p>%1$s <span id="cm-ctheme"></span> %2$s</p>%3$s</div>',
-						esc_html__( 'Child theme', 'childify-me' ),
-						esc_html__( 'successfully created!', 'childify-me' ),
+
+					$message = sprintf(
+						// Tanslators: %1$s html element to be filled via js.
+						esc_html__( 'Child theme %1$s succesfully created!', 'childify-me' ),
+						'<span id="cm-ctheme"></span>'
+					);
+
+					printf('<div id="cm-success" class="updated"><p>%1$s</p>%2$s</div>',
+						$message,
 						( ! is_multisite() ) ?
 							sprintf( '<a id="%3$s" class="button button-primary" href="%1$s" title="%2$s" tabindex="0">%2$s</a>',
 								sprintf( '%1$s?theme=', esc_url( admin_url( 'customize.php' ) ) ),
